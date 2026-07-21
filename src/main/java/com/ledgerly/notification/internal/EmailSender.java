@@ -20,7 +20,8 @@ public interface EmailSender {
 
         @Override
         public void send(String to, String subject, String body) {
-            log.info("EMAIL to='{}' subject='{}' body='{}'", to, subject, body);
+            log.info("EMAIL to='{}' subject='{}'", to, subject);
+            log.debug("EMAIL body: {}", body);
         }
     }
 }

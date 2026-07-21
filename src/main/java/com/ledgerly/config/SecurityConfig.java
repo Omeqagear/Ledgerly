@@ -2,22 +2,32 @@ package com.ledgerly.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Security configuration.
+ * Production/default security configuration.
  *
- * <p>For now the API is open (CSRF disabled, no session) so it is easy to exercise
- * the endpoints during development. The actuator endpoints required for ops
- * (health, info, prometheus, modulith) are also public. Replace this with proper
- * JWT / role-based access as part of Phase 7 of the roadmap.
+ * <p>Business endpoints require HTTP Basic authentication. A default dev user is
+ * provided so the API is usable out of the box, but you should replace this with
+ * JWT / OAuth2 / a real user store before production use.
  */
 @Configuration
+@Profile("!dev")
+@Order(1)
 public class SecurityConfig {
+
+    public static final String DEFAULT_USER = "ledgerly";
+    public static final String DEFAULT_PASSWORD = "ledgerly";
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,20 +41,11 @@ public class SecurityConfig {
                     "/actuator/health/**",
                     "/actuator/info",
                     "/actuator/prometheus",
-                    "/actuator/modulith",
-                    "/customers",
-                    "/customers/**",
-                    "/invoices",
-                    "/invoices/**",
-                    "/payments",
-                    "/payments/**",
-                    "/reports",
-                    "/reports/**"
+                    "/actuator/modulith"
                 ).permitAll()
-                .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic(basic -> basic.disable())
+            .httpBasic(basic -> {})
             .formLogin(form -> form.disable());
         return http.build();
     }
@@ -52,5 +53,15 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails user = User.builder()
+            .username(DEFAULT_USER)
+            .password(passwordEncoder.encode(DEFAULT_PASSWORD))
+            .roles("USER", "ADMIN")
+            .build();
+        return new InMemoryUserDetailsManager(user);
     }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Digits;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,6 +32,7 @@ public class Payment {
     private UUID customerId;
 
     @Column(nullable = false, precision = 19, scale = 2)
+    @Digits(integer = 17, fraction = 2)
     private BigDecimal amount;
 
     @Column(nullable = false, length = 32)

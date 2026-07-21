@@ -14,11 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Public application service for {@link Invoice} aggregates. Implements
- * {@link InvoiceAPI} so other modules can depend on the interface, but the
- * {@link #markAsPaid(UUID, BigDecimal)} method is intentionally <em>not</em>
- * on the API surface — it is invoked only from the invoice module's
- * {@code PaymentEventListener} after a payment succeeds.
+ * Public application service for {@link Invoice} aggregates.
  */
 @Service
 @Transactional
@@ -51,21 +47,22 @@ public class InvoiceService implements InvoiceAPI {
         return invoiceRepository.save(invoice);
     }
 
-    /**
-     * Marks an invoice as PAID and publishes {@link InvoicePaidEvent}.
-     *
-     * <p>Internal entry point for the payment flow — called by the invoice
-     * module's own listener when a {@code PaymentProcessedEvent} succeeds.
-     */
+    @Override
     public Invoice markAsPaid(UUID invoiceId, BigDecimal amountPaid) {
         Invoice invoice = load(invoiceId);
+        if (invoice.getStatus() != InvoiceStatus.ISSUED && invoice.getStatus() != InvoiceStatus.OVERDUE) {
+            throw new IllegalStateException(
+                "Invoice cannot be paid (current=" + invoice.getStatus() + ")");
+        }
+        BigDecimal paid = amountPaid != null ? amountPaid : invoice.getTotalAmount();
+        if (paid.compareTo(invoice.getTotalAmount()) != 0) {
+            throw new IllegalArgumentException(
+                "Payment amount " + paid + " does not match invoice total " + invoice.getTotalAmount());
+        }
         invoice.markAsPaid();
         invoice = invoiceRepository.save(invoice);
         eventPublisher.publishEvent(new InvoicePaidEvent(
-            invoice.getId(), invoice.getCustomerId(),
-            amountPaid != null ? amountPaid : invoice.getTotalAmount(),
-            LocalDateTime.now()
-        ));
+            invoice.getId(), invoice.getCustomerId(), paid, LocalDateTime.now()));
         return invoice;
     }
 

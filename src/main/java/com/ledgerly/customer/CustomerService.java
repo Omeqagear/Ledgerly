@@ -1,6 +1,7 @@
 package com.ledgerly.customer;
 
 import com.ledgerly.customer.internal.CustomerRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,18 +25,27 @@ public class CustomerService implements CustomerAPI {
     }
 
     public Customer createCustomer(String name, String email, String taxId, String address) {
-        if (customerRepository.existsByEmail(email)) {
+        assertEmailNotInUse(email);
+        try {
+            return customerRepository.save(new Customer(name, email, taxId, address));
+        } catch (DataIntegrityViolationException ex) {
             throw new DuplicateCustomerEmailException(email);
         }
-        return customerRepository.save(new Customer(name, email, taxId, address));
     }
 
     public Customer updateCustomer(UUID id, String name, String email, String taxId,
                                     String address, String preferredLanguage) {
         Customer customer = customerRepository.findById(id)
             .orElseThrow(() -> new CustomerNotFoundException(id));
+        if (!email.equalsIgnoreCase(customer.getEmail())) {
+            assertEmailNotInUse(email);
+        }
         customer.update(name, email, taxId, address, preferredLanguage);
-        return customerRepository.save(customer);
+        try {
+            return customerRepository.save(customer);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateCustomerEmailException(email);
+        }
     }
 
     @Override
@@ -60,5 +70,11 @@ public class CustomerService implements CustomerAPI {
             throw new CustomerNotFoundException(id);
         }
         customerRepository.deleteById(id);
+    }
+
+    private void assertEmailNotInUse(String email) {
+        if (customerRepository.existsByEmail(email)) {
+            throw new DuplicateCustomerEmailException(email);
+        }
     }
 }

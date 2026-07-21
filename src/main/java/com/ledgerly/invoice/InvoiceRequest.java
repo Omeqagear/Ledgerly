@@ -1,6 +1,7 @@
 package com.ledgerly.invoice;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -15,7 +16,7 @@ import java.util.UUID;
  */
 public record InvoiceRequest(
     @NotNull UUID customerId,
-    @NotNull @DecimalMin("0.00") BigDecimal totalAmount,
-    @NotNull @PositiveOrZero BigDecimal taxAmount,
+    @NotNull @DecimalMin("0.00") @Digits(integer = 17, fraction = 2) BigDecimal totalAmount,
+    @NotNull @PositiveOrZero @Digits(integer = 17, fraction = 2) BigDecimal taxAmount,
     @NotNull @Future LocalDate dueDate
 ) {}
