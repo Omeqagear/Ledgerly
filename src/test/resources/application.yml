@@ -1,0 +1,32 @@
+# Test profile overrides: in-memory H2 so no external database is required
+# during `@ApplicationModuleTest` runs. Spring Boot loads this file BEFORE
+# src/main/resources/application.yml because src/test/resources is ahead on
+# the test classpath.
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:ledgerly;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true
+
+server:
+  port: 0
