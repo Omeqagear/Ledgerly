@@ -1,0 +1,6 @@
+com/ledgerly/invoice/InvoiceModuleIntegrationTests.class
+com/ledgerly/ModularityTests.class
+com/ledgerly/payment/PaymentModuleIntegrationTests$EventCapture.class
+com/ledgerly/payment/PaymentModuleIntegrationTests.class
+com/ledgerly/payment/PaymentModuleIntegrationTests$EventCaptureConfig.class
+com/ledgerly/customer/CustomerModuleIntegrationTests.class
