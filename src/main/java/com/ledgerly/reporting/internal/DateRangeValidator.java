@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 
 @Component
-class DateRangeValidator {
+public class DateRangeValidator {
 
     public void validate(LocalDate from, LocalDate to) {
         if (from != null && to != null && from.isAfter(to)) {
