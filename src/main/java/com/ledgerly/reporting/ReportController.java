@@ -23,6 +23,11 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    /**
+     * Returns the ledger-wide summary. The optional {@code from}/{@code to} parameters
+     * filter only the invoice-by-status breakdown by issue date; all other metrics
+     * (customer count, payment counts, paid/outstanding totals) are all-time.
+     */
     @GetMapping("/summary")
     public OverallSummary summary(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
