@@ -38,4 +38,14 @@ public class ReportController {
     public CustomerSummary customer(@PathVariable UUID customerId) {
         return reportService.customerSummary(customerId);
     }
+
+    @GetMapping("/aging")
+    public AgingReport aging() {
+        return reportService.agingReport();
+    }
+
+    @GetMapping("/customers/{customerId}/aging")
+    public AgingReport customerAging(@PathVariable UUID customerId) {
+        return reportService.agingReportForCustomer(customerId);
+    }
 }

@@ -35,4 +35,12 @@ public class ReportService {
     public CustomerSummary customerSummary(UUID customerId) {
         return reportGenerator.forCustomer(customerId);
     }
+
+    public AgingReport agingReport() {
+        return reportGenerator.agingReport();
+    }
+
+    public AgingReport agingReportForCustomer(UUID customerId) {
+        return reportGenerator.agingReportForCustomer(customerId);
+    }
 }

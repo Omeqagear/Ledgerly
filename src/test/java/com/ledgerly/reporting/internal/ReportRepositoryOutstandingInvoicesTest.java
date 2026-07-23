@@ -8,6 +8,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,9 +27,9 @@ class ReportRepositoryOutstandingInvoicesTest {
     private JdbcTemplate jdbcTemplate;
 
     private static final UUID CUSTOMER_99 =
-        java.util.UUID.fromString("00000000-0000-0000-0000-000000000099");
+        UUID.fromString("00000000-0000-0000-0000-000000000099");
     private static final UUID CUSTOMER_88 =
-        java.util.UUID.fromString("00000000-0000-0000-0000-000000000088");
+        UUID.fromString("00000000-0000-0000-0000-000000000088");
 
     @Test
     void shouldFindOnlyIssuedAndOverdueInvoices() {
