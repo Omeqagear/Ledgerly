@@ -4,6 +4,8 @@ import com.ledgerly.reporting.CustomerSummary;
 import com.ledgerly.reporting.OverallSummary;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -24,15 +26,19 @@ public class ReportGenerator {
     }
 
     public OverallSummary overall() {
-        Map<String, Long> invoicesByStatus = toStatusMap(reportRepository.invoiceCountsByStatus());
+        return overall(null, null);
+    }
+
+    public OverallSummary overall(LocalDate from, LocalDate to) {
+        long totalCustomers = reportRepository.countCustomers();
+
+        Map<String, Long> invoicesByStatus = toStatusMap(reportRepository.invoiceCountsByStatus(from, to));
         Map<String, Long> paymentsByStatus = toStatusMap(reportRepository.paymentCountsByStatus());
-        return new OverallSummary(
-            reportRepository.countCustomers(),
-            invoicesByStatus,
-            paymentsByStatus,
-            reportRepository.totalAmountPaid(),
-            reportRepository.totalOutstanding()
-        );
+
+        BigDecimal totalAmountPaid = reportRepository.totalAmountPaid();
+        BigDecimal totalOutstanding = reportRepository.totalOutstanding();
+
+        return new OverallSummary(totalCustomers, invoicesByStatus, paymentsByStatus, totalAmountPaid, totalOutstanding);
     }
 
     public CustomerSummary forCustomer(UUID customerId) {
