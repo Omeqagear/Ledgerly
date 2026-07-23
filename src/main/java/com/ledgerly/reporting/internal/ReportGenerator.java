@@ -1,5 +1,7 @@
 package com.ledgerly.reporting.internal;
 
+import com.ledgerly.reporting.AgingBucket;
+import com.ledgerly.reporting.AgingReport;
 import com.ledgerly.reporting.CustomerSummary;
 import com.ledgerly.reporting.OverallSummary;
 import org.springframework.stereotype.Component;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -20,9 +23,11 @@ import java.util.UUID;
 public class ReportGenerator {
 
     private final ReportRepository reportRepository;
+    private final AgingCalculator agingCalculator;
 
-    ReportGenerator(ReportRepository reportRepository) {
+    ReportGenerator(ReportRepository reportRepository, AgingCalculator agingCalculator) {
         this.reportRepository = reportRepository;
+        this.agingCalculator = agingCalculator;
     }
 
     public OverallSummary overall() {
@@ -55,6 +60,42 @@ public class ReportGenerator {
             reportRepository.totalPaidForCustomer(customerId),
             reportRepository.totalOutstandingForCustomer(customerId)
         );
+    }
+
+    public AgingReport agingReport() {
+        return buildAgingReport(reportRepository.findOutstandingInvoices());
+    }
+
+    public AgingReport agingReportForCustomer(UUID customerId) {
+        return buildAgingReport(reportRepository.findOutstandingInvoicesForCustomer(customerId));
+    }
+
+    private AgingReport buildAgingReport(List<ReportRepository.OutstandingInvoice> outstanding) {
+        Map<String, List<ReportRepository.OutstandingInvoice>> grouped = agingCalculator.groupByBucket(outstanding);
+        List<AgingBucket> buckets = createBuckets(grouped);
+        BigDecimal totalOutstanding = calculateTotalOutstanding(outstanding);
+        return new AgingReport(buckets, totalOutstanding);
+    }
+
+    private static List<AgingBucket> createBuckets(
+            Map<String, List<ReportRepository.OutstandingInvoice>> grouped) {
+        List<String> bucketOrder = List.of("Current", "1-30 days", "31-60 days", "61-90 days", "90+ days");
+        return bucketOrder.stream()
+            .map(bucketName -> {
+                List<ReportRepository.OutstandingInvoice> invoices = grouped.getOrDefault(bucketName, List.of());
+                long count = invoices.size();
+                BigDecimal total = invoices.stream()
+                    .map(ReportRepository.OutstandingInvoice::totalAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                return new AgingBucket(bucketName, count, total);
+            })
+            .toList();
+    }
+
+    private static BigDecimal calculateTotalOutstanding(List<ReportRepository.OutstandingInvoice> outstanding) {
+        return outstanding.stream()
+            .map(ReportRepository.OutstandingInvoice::totalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static Map<String, Long> toStatusMap(java.util.List<ReportRepository.StatusCount> counts) {
