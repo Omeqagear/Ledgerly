@@ -45,4 +45,37 @@ class ReportRepositoryTest {
 
         assertThat(counts).hasSize(2);
     }
+
+    @Test
+    void shouldCountInvoicesByStatusWithFromOnly() {
+        ReportRepository repository = new ReportRepository(jdbcTemplate);
+        LocalDate from = LocalDate.of(2026, 2, 1);
+
+        List<ReportRepository.StatusCount> counts = repository.invoiceCountsByStatus(from, null);
+
+        assertThat(counts).hasSize(2);
+    }
+
+    @Test
+    void shouldCountInvoicesByStatusWithToOnly() {
+        ReportRepository repository = new ReportRepository(jdbcTemplate);
+        LocalDate to = LocalDate.of(2026, 2, 28);
+
+        List<ReportRepository.StatusCount> counts = repository.invoiceCountsByStatus(null, to);
+
+        assertThat(counts).hasSize(1);
+        assertThat(counts.get(0).status()).isEqualTo("ISSUED");
+        assertThat(counts.get(0).count()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoInvoicesMatchDateRange() {
+        ReportRepository repository = new ReportRepository(jdbcTemplate);
+        LocalDate from = LocalDate.of(2027, 1, 1);
+        LocalDate to = LocalDate.of(2027, 12, 31);
+
+        List<ReportRepository.StatusCount> counts = repository.invoiceCountsByStatus(from, to);
+
+        assertThat(counts).isEmpty();
+    }
 }

@@ -1,6 +1,7 @@
 package com.ledgerly.reporting.internal;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,6 +19,9 @@ import java.util.UUID;
 @Component
 class ReportRepository {
 
+    private static final RowMapper<StatusCount> STATUS_COUNT_MAPPER =
+        (rs, n) -> new StatusCount(rs.getString("status"), rs.getLong("cnt"));
+
     private final JdbcTemplate jdbc;
 
     ReportRepository(JdbcTemplate jdbc) {
@@ -32,7 +36,7 @@ class ReportRepository {
     List<StatusCount> invoiceCountsByStatus() {
         return jdbc.query(
             "SELECT status, COUNT(*) AS cnt FROM invoices GROUP BY status",
-            (rs, n) -> new StatusCount(rs.getString("status"), rs.getLong("cnt"))
+            STATUS_COUNT_MAPPER
         );
     }
 
@@ -59,7 +63,7 @@ class ReportRepository {
 
         return jdbc.query(
             sql.toString(),
-            (rs, n) -> new StatusCount(rs.getString("status"), rs.getLong("cnt")),
+            STATUS_COUNT_MAPPER,
             params.toArray()
         );
     }
