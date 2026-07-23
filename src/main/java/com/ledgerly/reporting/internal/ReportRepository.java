@@ -4,6 +4,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,6 +33,34 @@ class ReportRepository {
         return jdbc.query(
             "SELECT status, COUNT(*) AS cnt FROM invoices GROUP BY status",
             (rs, n) -> new StatusCount(rs.getString("status"), rs.getLong("cnt"))
+        );
+    }
+
+    List<StatusCount> invoiceCountsByStatus(LocalDate from, LocalDate to) {
+        StringBuilder sql = new StringBuilder("SELECT status, COUNT(*) AS cnt FROM invoices");
+        List<Object> params = new ArrayList<>();
+
+        if (from != null || to != null) {
+            sql.append(" WHERE ");
+            if (from != null && to != null) {
+                sql.append("issue_date BETWEEN ? AND ?");
+                params.add(from);
+                params.add(to);
+            } else if (from != null) {
+                sql.append("issue_date >= ?");
+                params.add(from);
+            } else {
+                sql.append("issue_date <= ?");
+                params.add(to);
+            }
+        }
+
+        sql.append(" GROUP BY status");
+
+        return jdbc.query(
+            sql.toString(),
+            (rs, n) -> new StatusCount(rs.getString("status"), rs.getLong("cnt")),
+            params.toArray()
         );
     }
 
