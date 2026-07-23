@@ -134,4 +134,41 @@ class ReportRepository {
     }
 
     record StatusCount(String status, long count) {}
+
+    record OutstandingInvoice(
+        UUID invoiceId,
+        UUID customerId,
+        String invoiceNumber,
+        BigDecimal totalAmount,
+        LocalDate dueDate
+    ) {}
+
+    List<OutstandingInvoice> findOutstandingInvoices() {
+        return jdbc.query(
+            "SELECT id, customer_id, invoice_number, total_amount, due_date "
+                + "FROM invoices WHERE status IN ('ISSUED', 'OVERDUE')",
+            (rs, n) -> new OutstandingInvoice(
+                rs.getObject("id", UUID.class),
+                rs.getObject("customer_id", UUID.class),
+                rs.getString("invoice_number"),
+                rs.getBigDecimal("total_amount"),
+                rs.getDate("due_date").toLocalDate()
+            )
+        );
+    }
+
+    List<OutstandingInvoice> findOutstandingInvoicesForCustomer(UUID customerId) {
+        return jdbc.query(
+            "SELECT id, customer_id, invoice_number, total_amount, due_date "
+                + "FROM invoices WHERE customer_id = ? AND status IN ('ISSUED', 'OVERDUE')",
+            (rs, n) -> new OutstandingInvoice(
+                rs.getObject("id", UUID.class),
+                rs.getObject("customer_id", UUID.class),
+                rs.getString("invoice_number"),
+                rs.getBigDecimal("total_amount"),
+                rs.getDate("due_date").toLocalDate()
+            ),
+            customerId
+        );
+    }
 }
