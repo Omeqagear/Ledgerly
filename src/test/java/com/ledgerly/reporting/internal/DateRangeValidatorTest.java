@@ -48,4 +48,11 @@ class DateRangeValidatorTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("from date must be before or equal to to date");
     }
+
+    @Test
+    void shouldAcceptEqualDates() {
+        LocalDate date = LocalDate.of(2026, 3, 31);
+        assertThatCode(() -> validator.validate(date, date))
+            .doesNotThrowAnyException();
+    }
 }
