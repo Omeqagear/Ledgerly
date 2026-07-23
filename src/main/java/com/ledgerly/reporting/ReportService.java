@@ -3,6 +3,7 @@ package com.ledgerly.reporting;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -14,13 +15,21 @@ import java.util.UUID;
 public class ReportService {
 
     private final com.ledgerly.reporting.internal.ReportGenerator reportGenerator;
+    private final com.ledgerly.reporting.internal.DateRangeValidator dateRangeValidator;
 
-    public ReportService(com.ledgerly.reporting.internal.ReportGenerator reportGenerator) {
+    public ReportService(com.ledgerly.reporting.internal.ReportGenerator reportGenerator,
+                         com.ledgerly.reporting.internal.DateRangeValidator dateRangeValidator) {
         this.reportGenerator = reportGenerator;
+        this.dateRangeValidator = dateRangeValidator;
     }
 
     public OverallSummary overallSummary() {
-        return reportGenerator.overall();
+        return overallSummary(null, null);
+    }
+
+    public OverallSummary overallSummary(LocalDate from, LocalDate to) {
+        dateRangeValidator.validate(from, to);
+        return reportGenerator.overall(from, to);
     }
 
     public CustomerSummary customerSummary(UUID customerId) {
