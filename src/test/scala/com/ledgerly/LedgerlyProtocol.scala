@@ -6,8 +6,10 @@ import io.gatling.http.protocol.HttpProtocolBuilder
 
 object LedgerlyProtocol {
 
+  private val baseUrl = System.getProperty("ledgerlyBaseUrl", "http://localhost:8080/api")
+
   val httpProtocol: HttpProtocolBuilder = http
-    .baseUrl("http://localhost:8080/api")
+    .baseUrl(baseUrl)
     .acceptHeader("application/json")
     .contentTypeHeader("application/json")
     .userAgentHeader("Gatling/LedgerlyLoadTest")

@@ -37,9 +37,13 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-echo "[4/4] Running Gatling simulations..."
-cd "$PROJECT_DIR"
-mvn gatling:test
+echo "[4/4] Running Gatling simulations (via Docker Maven)..."
+docker run --rm \
+  -v "$PROJECT_DIR:/app" \
+  -v maven-cache:/root/.m2 \
+  -w /app \
+  maven:3.9.9-eclipse-temurin-21 \
+  mvn -B -ntp gatling:test -DledgerlyBaseUrl=http://host.docker.internal:8080/api
 GATLING_EXIT=$?
 
 echo ""
