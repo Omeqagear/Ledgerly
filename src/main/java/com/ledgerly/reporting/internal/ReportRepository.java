@@ -143,6 +143,21 @@ class ReportRepository {
         LocalDate dueDate
     ) {}
 
+    public record CustomerInvoice(
+        UUID invoiceId,
+        String invoiceNumber,
+        BigDecimal totalAmount,
+        String status,
+        LocalDate issueDate
+    ) {}
+
+    public record CustomerPayment(
+        UUID paymentId,
+        BigDecimal amount,
+        String status,
+        LocalDate processedAt
+    ) {}
+
     List<OutstandingInvoice> findOutstandingInvoices() {
         return jdbc.query(
             "SELECT id, customer_id, invoice_number, total_amount, due_date "
@@ -167,6 +182,35 @@ class ReportRepository {
                 rs.getString("invoice_number"),
                 rs.getBigDecimal("total_amount"),
                 rs.getDate("due_date").toLocalDate()
+            ),
+            customerId
+        );
+    }
+
+    public List<CustomerInvoice> findCustomerInvoices(UUID customerId) {
+        return jdbc.query(
+            "SELECT id, invoice_number, total_amount, status, issue_date "
+            + "FROM invoices WHERE customer_id = ? ORDER BY issue_date DESC",
+            (rs, n) -> new CustomerInvoice(
+                rs.getObject("id", UUID.class),
+                rs.getString("invoice_number"),
+                rs.getBigDecimal("total_amount"),
+                rs.getString("status"),
+                rs.getDate("issue_date").toLocalDate()
+            ),
+            customerId
+        );
+    }
+
+    public List<CustomerPayment> findCustomerPayments(UUID customerId) {
+        return jdbc.query(
+            "SELECT id, amount, status, processed_at "
+            + "FROM payments WHERE customer_id = ? ORDER BY processed_at DESC",
+            (rs, n) -> new CustomerPayment(
+                rs.getObject("id", UUID.class),
+                rs.getBigDecimal("amount"),
+                rs.getString("status"),
+                rs.getDate("processed_at") != null ? rs.getDate("processed_at").toLocalDate() : null
             ),
             customerId
         );
