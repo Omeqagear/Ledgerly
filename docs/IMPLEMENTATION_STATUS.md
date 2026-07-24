@@ -282,6 +282,9 @@ What was delivered:
   timestamp + random suffixes
 - Run with: `docker compose up -d && mvn gatling:test`
 - HTML reports generated in `target/gatling/`
+- `scripts/gatling-e2e.sh`: orchestrates `docker compose down --volumes`,
+  `docker compose up --build -d`, health check, full Gatling simulation run,
+  and teardown — single-command E2E test
 
 #### Phase 9d — Query optimization (NOT STARTED)
 
