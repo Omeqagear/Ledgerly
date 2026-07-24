@@ -11,9 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Public application service for {@link Payment} aggregates. Implements
@@ -86,15 +87,18 @@ public class PaymentService implements PaymentAPI {
         return paymentRepository.findById(id);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<Payment> findByInvoiceId(UUID invoiceId) {
-        return paymentRepository.findByInvoiceId(invoiceId);
+    public Page<Payment> findAll(Pageable pageable) {
+        return paymentRepository.findAll(pageable);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<Payment> findByCustomerId(UUID customerId) {
-        return paymentRepository.findByCustomerId(customerId);
+    public Page<Payment> findByInvoiceId(UUID invoiceId, Pageable pageable) {
+        return paymentRepository.findByInvoiceId(invoiceId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Payment> findByCustomerId(UUID customerId, Pageable pageable) {
+        return paymentRepository.findByCustomerId(customerId, pageable);
     }
 }

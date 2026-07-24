@@ -10,8 +10,4 @@ import java.util.UUID;
 public interface PaymentAPI {
 
     Optional<Payment> findById(UUID id);
-
-    java.util.List<Payment> findByInvoiceId(UUID invoiceId);
-
-    java.util.List<Payment> findByCustomerId(UUID customerId);
 }
