@@ -248,6 +248,24 @@ production.
 | `GET` | `/reports/summary` | Ledger-wide totals |
 | `GET` | `/reports/customers/{id}` | Per-customer summary |
 
+### Pagination & sorting
+
+All list endpoints (`GET /customers`, `GET /invoices`, `GET /payments`,
+`GET /users`) accept these query parameters:
+
+| Param | Default | Description |
+|-------|---------|-------------|
+| `page` | `0` | Zero-indexed page number |
+| `size` | `20` | Page size (max `100`) |
+| `sort` | natural | `field,dir` — e.g. `sort=name,asc` or `sort=createdAt,desc`; repeatable |
+
+Responses are Spring `Page` objects (`{ content, totalElements, totalPages, ... }`), not bare arrays.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8080/api/customers?page=0&size=10&sort=name,asc"
+```
+
 ---
 
 ## Example flow
