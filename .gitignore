@@ -43,3 +43,4 @@ replay_pid*
 Thumbs.db
 
 *.m2tmp
+*.codegraph
