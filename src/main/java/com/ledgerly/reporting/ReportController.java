@@ -1,5 +1,6 @@
 package com.ledgerly.reporting;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -47,5 +49,12 @@ public class ReportController {
     @GetMapping("/customers/{customerId}/aging")
     public AgingReport customerAging(@PathVariable UUID customerId) {
         return reportService.agingReportForCustomer(customerId);
+    }
+
+    @GetMapping("/invoices/{invoiceId}/pdf")
+    public void invoicePdf(@PathVariable UUID invoiceId, HttpServletResponse response) throws IOException {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"invoice-" + invoiceId + ".pdf\"");
+        reportService.generateInvoicePdf(response.getOutputStream(), invoiceId);
     }
 }
