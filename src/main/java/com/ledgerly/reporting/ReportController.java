@@ -64,4 +64,16 @@ public class ReportController {
         response.setHeader("Content-Disposition", "attachment; filename=\"statement-" + customerId + ".pdf\"");
         reportService.generateCustomerStatementPdf(response.getOutputStream(), customerId);
     }
+
+    private static final String EXCEL_CONTENT_TYPE =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    @GetMapping("/summary/excel")
+    public void summaryExcel(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                             HttpServletResponse response) throws IOException {
+        response.setContentType(EXCEL_CONTENT_TYPE);
+        response.setHeader("Content-Disposition", "attachment; filename=\"summary.xlsx\"");
+        reportService.generateSummaryExcel(response.getOutputStream(), from, to);
+    }
 }

@@ -17,13 +17,16 @@ public class ReportService {
     private final com.ledgerly.reporting.internal.ReportGenerator reportGenerator;
     private final com.ledgerly.reporting.internal.DateRangeValidator dateRangeValidator;
     private final com.ledgerly.reporting.internal.PdfService pdfService;
+    private final com.ledgerly.reporting.internal.ExcelService excelService;
 
     public ReportService(com.ledgerly.reporting.internal.ReportGenerator reportGenerator,
                          com.ledgerly.reporting.internal.DateRangeValidator dateRangeValidator,
-                         com.ledgerly.reporting.internal.PdfService pdfService) {
+                         com.ledgerly.reporting.internal.PdfService pdfService,
+                         com.ledgerly.reporting.internal.ExcelService excelService) {
         this.reportGenerator = reportGenerator;
         this.dateRangeValidator = dateRangeValidator;
         this.pdfService = pdfService;
+        this.excelService = excelService;
     }
 
     public OverallSummary overallSummary() {
@@ -53,5 +56,10 @@ public class ReportService {
 
     public void generateCustomerStatementPdf(java.io.OutputStream output, java.util.UUID customerId) {
         pdfService.generateCustomerStatementPdf(output, customerId);
+    }
+
+    public void generateSummaryExcel(java.io.OutputStream output, LocalDate from, LocalDate to) {
+        dateRangeValidator.validate(from, to);
+        excelService.generateSummaryExcel(output, from, to);
     }
 }
