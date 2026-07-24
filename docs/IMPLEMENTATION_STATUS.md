@@ -258,10 +258,30 @@ What was delivered:
   with `mvn test -Dgroups=redis` when Docker is available)
 - `testcontainers-redis` 2.2.2 test dependency
 
-#### Phase 9c — Load/performance tests (NOT STARTED)
+#### Phase 9c — Load/performance tests (COMPLETED)
 
-- Add Gatling or k6 load tests against the running app
-- Best done after pagination + caching land
+**Status:** all planned features implemented.
+
+What was delivered:
+- 4 Gatling simulations simulating realistic CRUD-heavy user flows:
+  - `CustomerSimulation` — 50 users, 30s ramp: create, list, get, update,
+    delete customers
+  - `InvoicePaymentSimulation` — 30 users, 30s ramp: create customer →
+    create invoice → issue → pay → verify payment status
+  - `ReportingSimulation` — 20 users, 20s ramp: create setup data → fetch
+    summary, aging, customer report, invoice PDF, Excel summary
+  - `MixedWorkloadSimulation` — 50 users, 60s ramp: random-weight mix of
+    40% customer CRUD, 35% invoice+payment, 25% reporting reads
+- Shared `LedgerlyProtocol` with base URL (`localhost:8080/api`) and JWT
+  auth login step (logs in as seeded admin, stores token in session)
+- `gatling-maven-plugin` 4.8.2 and `scala-maven-plugin` 4.8.1 in pom.xml
+- `gatling-charts-highcharts` 3.10.5 test dependency
+- Assertions on success rate (>99% per simulation) and p99 response
+  times (1–5s depending on endpoint weight)
+- Ephemeral test data: each user creates unique entities via feeder with
+  timestamp + random suffixes
+- Run with: `docker compose up -d && mvn gatling:test`
+- HTML reports generated in `target/gatling/`
 
 #### Phase 9d — Query optimization (NOT STARTED)
 
