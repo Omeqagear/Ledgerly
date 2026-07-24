@@ -1,5 +1,7 @@
 package com.ledgerly.user;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,8 +28,8 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponse> list() {
-        return userService.findAll().stream().map(UserResponse::from).toList();
+    public Page<UserResponse> list(Pageable pageable) {
+        return userService.findAll(pageable).map(UserResponse::from);
     }
 
     @GetMapping("/{id}")

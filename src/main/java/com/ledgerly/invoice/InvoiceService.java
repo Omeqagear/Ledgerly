@@ -3,6 +3,8 @@ package com.ledgerly.invoice;
 import com.ledgerly.invoice.internal.InvoiceNumberGenerator;
 import com.ledgerly.invoice.internal.InvoiceRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +89,21 @@ public class InvoiceService implements InvoiceAPI {
     @Transactional(readOnly = true)
     public List<Invoice> findAll() {
         return invoiceRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Invoice> findAll(Pageable pageable) {
+        return invoiceRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Invoice> findByCustomerId(UUID customerId, Pageable pageable) {
+        return invoiceRepository.findByCustomerId(customerId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Invoice> findOverdueInvoices(Pageable pageable) {
+        return invoiceRepository.findOverdueInvoices(pageable);
     }
 
     private Invoice load(UUID id) {

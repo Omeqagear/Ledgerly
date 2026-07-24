@@ -201,14 +201,57 @@ What was delivered:
 
 ### Phase 9 — Performance, caching, and optimization
 
-**Status:** not started.
+**Status:** split into sub-phases. Phase 9a (pagination & sorting) is complete;
+9b–9e are not started.
 
-What remains:
-- Add Redis for caching frequently read data (customer lookup, report summaries)
-- Implement pagination and sorting on list endpoints
-- Add database query analysis and optimize hot paths
-- Add load/performance tests (e.g., Gatling or JMeter)
-- Tune connection pool, JVM, and container resource limits
+Phase 9 was broken into independent sub-plans (each is self-contained and
+testable on its own):
+
+#### Phase 9a — Pagination & sorting (COMPLETED)
+
+**Status:** all planned features implemented. 101 tests pass (0 failures).
+
+- Design spec: `docs/superpowers/specs/2026-07-24-pagination-sorting-design.md`
+- Implementation plan: `docs/superpowers/plans/2026-07-24-pagination-sorting.md`
+
+What was delivered:
+- `spring.data.web.pageable` config (default page size 20, max 100) in both
+  main and test `application.yml`
+- Customer, invoice, payment, and user list endpoints now return Spring Data
+  `Page<T>` instead of bare arrays, accepting `?page`, `?size`, and
+  `?sort=field,dir` (repeatable) query params
+- Existing `List<T>` service methods kept where internal callers exist
+  (invoice's `OverdueInvoiceMarker`); payment's `List` variants replaced since
+  they had no internal callers
+- `PaymentAPI` trimmed to `findById` only (filtered methods were unused by
+  other modules)
+- `PaymentController` no-filter branch fixed: returns `findAll(pageable)`
+  instead of `List.of()`
+- `Page.map(UserResponse::from)` used in the user controller to preserve the
+  DTO mapping
+- 5 new test classes: per-module pagination integration tests + an HTTP-level
+  MockMvc test verifying query-param binding, sort application, and size
+  clamping
+
+#### Phase 9b — Redis caching (NOT STARTED)
+
+- Add Spring Cache + Redis for customer lookups and report summaries
+- Requires a Redis service in docker-compose + testcontainers
+
+#### Phase 9c — Load/performance tests (NOT STARTED)
+
+- Add Gatling or k6 load tests against the running app
+- Best done after pagination + caching land
+
+#### Phase 9d — Query optimization (NOT STARTED)
+
+- Add DB indexes, EXPLAIN analysis, optimize `ReportRepository` hot SQL
+- Most valuable once load tests identify the hot paths
+
+#### Phase 9e — Resource tuning (NOT STARTED)
+
+- Tune HikariCP pool, JVM heap, container memory/CPU limits
+- Depends on load test results to be meaningful
 
 ### Beyond the original plan
 
@@ -227,13 +270,14 @@ Items that surfaced during review and should be addressed before production:
 
 ## How to pick the next phase
 
-Phases 6, 7, and 8 are complete. The remaining roadmap work is:
+Phases 6, 7, 8, and 9a are complete. Phase 9b–9e remain. The remaining
+roadmap work is:
 
 1. **If the goal is a production-ready MVP:** the next priority is the real
-   payment gateway integration ("Beyond the original plan") and then Phase 9
-   (Redis caching, pagination, load testing).
-2. **If the goal is internal tooling:** Phase 9 (Redis caching, pagination,
-   sorting) gives the most value.
+   payment gateway integration ("Beyond the original plan") and then Phase 9b
+   (Redis caching) and Phase 9c (load testing).
+2. **If the goal is internal tooling:** Phase 9b (Redis caching) gives the
+   most value now that pagination is in place.
 3. **If the goal is hardening the auth story:** the descoped Phase 7 items
    (refresh tokens, logout, per-ownership protection, finer-grained roles) come
    next.

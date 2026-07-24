@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 /**
@@ -48,15 +49,16 @@ public class PaymentController {
     }
 
     @GetMapping
-    public List<Payment> list(@RequestParam(value = "invoiceId", required = false) UUID invoiceId,
-                              @RequestParam(value = "customerId", required = false) UUID customerId) {
+    public Page<Payment> list(@RequestParam(value = "invoiceId", required = false) UUID invoiceId,
+                              @RequestParam(value = "customerId", required = false) UUID customerId,
+                              Pageable pageable) {
         if (invoiceId != null) {
-            return paymentService.findByInvoiceId(invoiceId);
+            return paymentService.findByInvoiceId(invoiceId, pageable);
         }
         if (customerId != null) {
-            return paymentService.findByCustomerId(customerId);
+            return paymentService.findByCustomerId(customerId, pageable);
         }
-        return List.of();
+        return paymentService.findAll(pageable);
     }
 
     @ExceptionHandler(PaymentNotFoundException.class)

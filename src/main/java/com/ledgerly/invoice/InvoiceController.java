@@ -1,5 +1,7 @@
 package com.ledgerly.invoice;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -44,15 +45,16 @@ public class InvoiceController {
     }
 
     @GetMapping
-    public List<Invoice> list(@RequestParam(value = "customerId", required = false) UUID customerId,
-                              @RequestParam(value = "overdue", required = false, defaultValue = "false") boolean overdue) {
+    public Page<Invoice> list(@RequestParam(value = "customerId", required = false) UUID customerId,
+                              @RequestParam(value = "overdue", required = false, defaultValue = "false") boolean overdue,
+                              Pageable pageable) {
         if (overdue) {
-            return invoiceService.findOverdueInvoices();
+            return invoiceService.findOverdueInvoices(pageable);
         }
         if (customerId != null) {
-            return invoiceService.findByCustomerId(customerId);
+            return invoiceService.findByCustomerId(customerId, pageable);
         }
-        return invoiceService.findAll();
+        return invoiceService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
