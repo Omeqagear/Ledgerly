@@ -103,6 +103,15 @@ so audit consumers and failure notifications can react to it.
 
 ### Run with Docker Compose
 
+The compose file reads configuration from a `.env` file. Copy the example and
+adjust values for your environment:
+
+```bash
+cp .env.example .env
+```
+
+Then start the stack:
+
 ```bash
 # Build the image and start Postgres + app + Prometheus
 docker compose up --build -d
@@ -316,10 +325,20 @@ LEDGERLY_DB_USER=ledgerly
 LEDGERLY_DB_PASS=ledgerly_secret
 ```
 
-### Docker Compose environment
+### Environment configuration
 
-The compose file activates `prod` and overrides the datasource URL to point at
-the `postgres` service.
+The `docker-compose.yml` reads all environment variables from a `.env` file
+(see `.env.example` for the full list of required variables). Key settings:
+
+| Variable | Purpose |
+|----------|---------|
+| `SPRING_PROFILES_ACTIVE` | Spring profile (`prod` for Docker) |
+| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | Postgres credentials |
+| `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` | JDBC connection |
+| `REDIS_HOST` / `REDIS_PORT` | Redis connection |
+
+`.env` is gitignored — never commit secrets. `.env.example` serves as a
+template for new deployments.
 
 ---
 
