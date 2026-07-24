@@ -201,14 +201,47 @@ What was delivered:
 
 ### Phase 9 — Performance, caching, and optimization
 
-**Status:** not started.
+**Status:** split into sub-phases. Phase 9a (pagination & sorting) is in progress;
+9b–9e are not started.
 
-What remains:
-- Add Redis for caching frequently read data (customer lookup, report summaries)
-- Implement pagination and sorting on list endpoints
-- Add database query analysis and optimize hot paths
-- Add load/performance tests (e.g., Gatling or JMeter)
-- Tune connection pool, JVM, and container resource limits
+Phase 9 was broken into independent sub-plans (each is self-contained and
+testable on its own):
+
+#### Phase 9a — Pagination & sorting (IN PROGRESS)
+
+**Status:** plan written; implementation not started.
+
+- Design spec: `docs/superpowers/specs/2026-07-24-pagination-sorting-design.md`
+- Implementation plan: `docs/superpowers/plans/2026-07-24-pagination-sorting.md`
+
+Scope:
+- Replace `List<T>` list responses with Spring Data `Page<T>` on the customer,
+  invoice, payment, and user modules
+- Support `?page`, `?size` (default 20, max 100), and `?sort=field,dir` query params
+- Preserve filtered query behavior (invoice `customerId`/`overdue`, payment
+  `invoiceId`/`customerId`) with pagination applied
+- Breaking API change (array → `Page` JSON object); acceptable for the scaffold
+- No changes to the reporting module (aggregations, not list endpoints)
+
+#### Phase 9b — Redis caching (NOT STARTED)
+
+- Add Spring Cache + Redis for customer lookups and report summaries
+- Requires a Redis service in docker-compose + testcontainers
+
+#### Phase 9c — Load/performance tests (NOT STARTED)
+
+- Add Gatling or k6 load tests against the running app
+- Best done after pagination + caching land
+
+#### Phase 9d — Query optimization (NOT STARTED)
+
+- Add DB indexes, EXPLAIN analysis, optimize `ReportRepository` hot SQL
+- Most valuable once load tests identify the hot paths
+
+#### Phase 9e — Resource tuning (NOT STARTED)
+
+- Tune HikariCP pool, JVM heap, container memory/CPU limits
+- Depends on load test results to be meaningful
 
 ### Beyond the original plan
 
@@ -227,13 +260,14 @@ Items that surfaced during review and should be addressed before production:
 
 ## How to pick the next phase
 
-Phases 6, 7, and 8 are complete. The remaining roadmap work is:
+Phases 6, 7, and 8 are complete. Phase 9 is in progress (9a: pagination &
+sorting). The remaining roadmap work is:
 
 1. **If the goal is a production-ready MVP:** the next priority is the real
-   payment gateway integration ("Beyond the original plan") and then Phase 9
-   (Redis caching, pagination, load testing).
-2. **If the goal is internal tooling:** Phase 9 (Redis caching, pagination,
-   sorting) gives the most value.
+   payment gateway integration ("Beyond the original plan") and then Phase 9b
+   (Redis caching) and Phase 9c (load testing).
+2. **If the goal is internal tooling:** finish Phase 9a (pagination & sorting),
+   then Phase 9b (Redis caching) gives the most value.
 3. **If the goal is hardening the auth story:** the descoped Phase 7 items
    (refresh tokens, logout, per-ownership protection, finer-grained roles) come
    next.
