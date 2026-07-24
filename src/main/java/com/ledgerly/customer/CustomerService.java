@@ -2,6 +2,8 @@ package com.ledgerly.customer;
 
 import com.ledgerly.customer.internal.CustomerRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,11 @@ public class CustomerService implements CustomerAPI {
     @Transactional(readOnly = true)
     public List<Customer> findAll() {
         return customerRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Customer> findAll(Pageable pageable) {
+        return customerRepository.findAll(pageable);
     }
 
     @Override
