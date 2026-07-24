@@ -61,7 +61,7 @@ public class UserController {
     public record CreateUserRequest(
         @NotBlank @Size(max = 64) String username,
         @NotBlank @Size(min = 6, max = 128) String password,
-        @NotBlank String role
+        @NotBlank @jakarta.validation.constraints.Pattern(regexp = "ADMIN|USER", message = "role must be ADMIN or USER") String role
     ) {}
 
     public record ChangePasswordRequest(
