@@ -15,10 +15,10 @@ Container_Boundary("LedgerlyApplication.LedgerlyApplication_boundary", "Ledgerly
   Component(LedgerlyApplication.LedgerlyApplication.PaymentProcessing, "Payment Processing", $techn="Module", $descr="", $tags="", $link="")
 }
 
+Rel(LedgerlyApplication.LedgerlyApplication.PaymentProcessing, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Notification, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "listens to", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Notification, LedgerlyApplication.LedgerlyApplication.PaymentProcessing, "listens to", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Notification, LedgerlyApplication.LedgerlyApplication.CustomerManagement, "uses", $techn="", $tags="", $link="")
-Rel(LedgerlyApplication.LedgerlyApplication.PaymentProcessing, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 @enduml
