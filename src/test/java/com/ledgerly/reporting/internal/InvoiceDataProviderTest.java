@@ -48,7 +48,6 @@ class InvoiceDataProviderTest {
         when(invoiceService.findById(invoiceId)).thenReturn(Optional.of(invoice));
 
         Customer customer = mock(Customer.class);
-        when(customer.getId()).thenReturn(customerId);
         when(customerService.findById(customerId)).thenReturn(Optional.of(customer));
 
         InvoiceDataProvider.InvoiceWithCustomer result =
