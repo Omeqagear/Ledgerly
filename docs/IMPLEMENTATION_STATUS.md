@@ -67,26 +67,63 @@ is required.
 #### 5. Reporting module (`com.ledgerly.reporting`)
 
 - Read-only aggregations through `ReportRepository` (raw SQL via `JdbcTemplate`)
+- Document generation via OpenPDF (PDF) and Apache POI (Excel)
+- Depends on `invoice` and `customer` modules via `InvoiceAPI` / `CustomerService`
+- Date-range filtering on summary reports (applies only to invoice-by-status)
+- Aging reports with 5 buckets (Current, 1–30, 31–60, 61–90, 90+ days)
 - REST endpoints:
-  - `/reports/summary` — ledger-wide totals by status
+  - `/reports/summary?from=&to=` — date-filtered JSON summary
+  - `/reports/aging` — ledger-wide aging report
   - `/reports/customers/{customerId}` — per-customer summary
-- No compile-time dependencies on other business modules
+  - `/reports/customers/{customerId}/aging` — per-customer aging
+  - `/reports/invoices/{id}/pdf` — invoice PDF download (OpenPDF)
+  - `/reports/customers/{id}/statement.pdf` — customer statement PDF with transaction history
+  - `/reports/summary/excel` — Excel summary export (Apache POI)
+  - `/reports/aging/excel` — Excel aging export
+  - `/reports/customers/{id}/excel` — Excel customer summary export
+- Module-level exception handler (`ReportingExceptionHandler`)
+
+#### 6. User module (`com.ledgerly.user`)
+
+- Aggregate: `User` (authentication account — distinct from a billing `Customer`)
+  with fields `id`, `username`, `passwordHash`, `role`, `createdAt`
+- Public API: `UserService` (CRUD + password encoding), `UserController`
+- REST endpoints under `/users` (create, list, get, change password, delete)
+- Passwords are BCrypt-hashed; raw passwords are never stored
+- Duplicate username rejected on create and update
+  (`DataIntegrityViolationException` → `DuplicateUserException`)
+- `SeedUserRunner` creates a configurable admin user on first boot
+  (`LEDGERLY_SEED_ADMIN_USERNAME` / `LEDGERLY_SEED_ADMIN_PASSWORD`)
+
+#### 7. Auth module (`com.ledgerly.auth`)
+
+- `POST /auth/login` validates credentials against the `user` store and returns a
+  signed JWT (`{token, expiresIn, username, role}`)
+- `JwtService` encodes/decodes HS256 JWTs via Spring Security OAuth2 Resource
+  Server + Nimbus
+- Token claims: `sub` = username, `role` = `ADMIN`/`USER`, `iat`, `exp` (30 min)
+- `internal/ApplicationUserDetailsService` loads `User` via `UserService` and maps
+  the role to a `ROLE_<role>` granted authority
+- `AuthConfig` exposes `SecretKey`, `JwtService`, and `JwtDecoder` beans
 
 ### Shared infrastructure
 
 - **Docker / Docker Compose** — multi-stage `Dockerfile`, compose stack with
   app, Postgres, and Prometheus
-- **Flyway migrations** — `V1`–`V5` create `customers`, `invoices`, `payments`,
-  `event_publication`, and `event_publication_archive`
+- **Flyway migrations** — `V1`–`V6` create `customers`, `invoices`, `payments`,
+  `event_publication`, `event_publication_archive`, and `users`
 - **Spring Modulith event persistence** — JPA-backed event publication registry
 - **Observability** — Actuator + Prometheus scraping endpoint
 - **Security** — profile-based split:
   - `dev` profile: open endpoints
-  - `prod`/default: HTTP Basic with default user `ledgerly` / `ledgerly`
+  - `prod`/default: stateless JWT resource server (HS256). `/auth/login` and the
+    actuator health/info/prometheus/modulith endpoints are public; `/users/**` is
+    `ADMIN`-only; everything else under `/api` requires a valid JWT
 - **Global exception handling** — `RestExceptionHandler` maps domain and validation
   exceptions to proper HTTP status codes (400/404/409)
-- **Tests** — `ModularityTests`, module-level `@ApplicationModuleTest` suites,
-  and an end-to-end `@SpringBootTest` for the payment flow
+- **Tests** — `ModularityTests` (architecture verification), `ModulithDocumentationTests`
+  (diagram generation, gated), module-level `@ApplicationModuleTest` suites, and
+  end-to-end `@SpringBootTest` flows for payment and auth
 
 ### Architectural decisions
 
@@ -98,45 +135,69 @@ is required.
   payment service, and synchronously marks the invoice paid on success.
   `InvoicePaidEvent` is still emitted by the invoice module and consumed by
   notification.
-- **Reporting uses raw SQL.** This avoids loading all aggregates into memory and
-  keeps the reporting module free of compile-time dependencies on other modules.
+- **Reporting uses raw SQL + document generation.** Reports are powered by raw
+  SQL via `JdbcTemplate` (no ORM overhead) and document generation via OpenPDF
+  and Apache POI. Reports share dependency direction (reporting → invoice +
+  customer) via `InvoiceAPI` and `CustomerService`.
+- **Auth is a separate module from user.** `auth` depends on `user` (to load
+  credentials) and exposes the login endpoint + `JwtService`. `config` depends on
+  `auth` for JWT resource-server wiring. `user` has no dependency on `auth` or
+  `config`, so no cycle is introduced.
+- **Phase 7 scope was deliberately narrowed to access tokens.** The original
+  roadmap listed refresh tokens, logout, the `CUSTOMER`/`ACCOUNTANT` roles, and
+  per-ownership endpoint protection. The agreed design spec shipped only
+  short-lived access tokens (30 min) and `ADMIN`/`USER` roles; the rest is
+  deferred to "Beyond the original plan".
 
 ---
 
 ## Roadmap — remaining phases
 
-### Phase 6 — Reporting enhancements (partially done)
+### Phase 6 — Reporting enhancements (COMPLETED)
 
-**Status:** aggregations are implemented; PDF generation is not.
+**Status:** All planned features implemented. PDF generation (OpenPDF), Excel
+export (Apache POI), date-range filtering, aging reports (ledger-wide +
+per-customer), and customer statement PDFs are all live.
 
-What remains:
-- Generate PDF invoices/reports (e.g., with OpenPDF, iText, or JasperReports)
-- Add date-range filters to `/reports/summary`
-- Export customer statements as downloadable PDFs
-- Add receivables aging report (0–30, 31–60, 61–90, 90+ days)
+### Phase 7 — Security (COMPLETED)
 
-### Phase 7 — Security (partially done)
+**Status:** HTTP Basic with the hard-coded in-memory user has been replaced by
+stateless JWT authentication backed by a database user store, with role-based
+access control.
 
-**Status:** HTTP Basic with a hard-coded in-memory user is in place.
+What was delivered:
+- New `user` module (`User` entity, `UserService`, `UserController`, Flyway `V6`)
+  with BCrypt-hashed passwords and a seeded admin user
+- New `auth` module (`POST /auth/login`, `JwtService`,
+  `ApplicationUserDetailsService`) issuing HS256 JWTs (30-min expiry)
+- `SecurityConfig` switched to a Spring Security OAuth2 resource server;
+  `/auth/login` + actuator endpoints public, `/users/**` `ADMIN`-only, the rest
+  authenticated
+- Tests: `UserServiceTest`, `JwtServiceTest`, `AuthModuleIntegrationTest`,
+  `SecurityIntegrationTest`
 
-What remains:
-- Replace the dev-only in-memory user with JWT-based authentication
-- Add role-based access control (e.g., `ADMIN`, `ACCOUNTANT`, `CUSTOMER`)
-- Protect customer and invoice endpoints per role/ownership
-- Refresh-token flow and logout handling
-- Store users in the database (new `user` module or extend customer module)
+What was descoped (deferred to "Beyond the original plan"):
+- Refresh-token flow and logout / token blocklist
+- `CUSTOMER` / `ACCOUNTANT` roles and per-ownership endpoint protection
 
-### Phase 8 — Module verification & documentation generation
+### Phase 8 — Module verification & documentation generation (COMPLETED)
 
-**Status:** architecture verification tests exist; generated documentation is not
-persisted as build artifacts.
+**Status:** architecture verification is enforced in CI, and generated PlantUML
+diagrams / module canvases are committed as build artifacts.
 
-What remains:
-- Run `Documenter.writeModulesAsPlantUml()` and `writeModuleCanvases()` in CI and
-  commit/check the generated PlantUML / canvas diagrams
-- Add a CI job that fails the build on `ApplicationModules.verify()` violations
-- Publish module diagrams and dependency graphs to the README or a `docs/`
-  folder automatically
+What was delivered:
+- `ModulithDocumentationTests` runs `Documenter.writeModulesAsPlantUml()`,
+  `writeIndividualModulesAsPlantUml()`, `writeModuleCanvases()`, and
+  `writeAggregatingDocument()` into the committed `docs/modulith/` folder. It is
+  gated behind `-Dgen-modulith-docs=true` so the normal test suite does not wipe
+  committed artifacts.
+- GitHub Actions workflow (`.github/workflows/ci.yml`):
+  - `verify` job runs `mvn test`, which fails the build on any
+    `ApplicationModules.verify()` violation
+  - `docs` job regenerates the diagrams and commits them back on push to the
+    default branch (`[skip ci]` to avoid loops)
+- README links to `docs/modulith/` and documents how to regenerate the diagrams
+  locally
 
 ### Phase 9 — Performance, caching, and optimization
 
@@ -152,6 +213,9 @@ What remains:
 ### Beyond the original plan
 
 Items that surfaced during review and should be addressed before production:
+- Refresh-token rotation and a logout / JWT blocklist flow (descoped from Phase 7)
+- Per-ownership endpoint protection and finer-grained roles
+  (`CUSTOMER` / `ACCOUNTANT`) (descoped from Phase 7)
 - Replace the stub `PaymentGatewayClient` with a real PSP integration (Stripe,
   Adyen, etc.) and add idempotency keys
 - Add idempotency keys for invoice/payment creation endpoints
@@ -163,10 +227,13 @@ Items that surfaced during review and should be addressed before production:
 
 ## How to pick the next phase
 
-1. **If the goal is a production-ready MVP:** start with Phase 7 (JWT/RBAC) and
-   Phase 6 (PDF invoices), then the real payment gateway.
-2. **If the goal is internal tooling:** Phase 6 (date-range reports, aging) and
-   Phase 9 (Redis caching) give the most value.
-3. **If the goal is hardening the Modulith architecture:** Phase 8 (CI-verified
-   documentation + diagrams) and the "Beyond the original plan" audit/resilience
-   items.
+Phases 6, 7, and 8 are complete. The remaining roadmap work is:
+
+1. **If the goal is a production-ready MVP:** the next priority is the real
+   payment gateway integration ("Beyond the original plan") and then Phase 9
+   (Redis caching, pagination, load testing).
+2. **If the goal is internal tooling:** Phase 9 (Redis caching, pagination,
+   sorting) gives the most value.
+3. **If the goal is hardening the auth story:** the descoped Phase 7 items
+   (refresh tokens, logout, per-ownership protection, finer-grained roles) come
+   next.

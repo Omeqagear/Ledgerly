@@ -1,0 +1,20 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.ledgerly.reporting`
+|Spring components
+|_Controllers_
+
+* `c.l.r.ReportController`
+
+_Services_
+
+* `c.l.r.ReportService`
+
+_Others_
+
+* `c.l.r.ReportingExceptionHandler`
+|Bean references
+|* `c.l.i.InvoiceService` (in Invoice Management)
+* `c.l.c.CustomerService` (in Customer Management)
+|===

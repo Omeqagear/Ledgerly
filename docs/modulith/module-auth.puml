@@ -1,0 +1,19 @@
+@startuml
+set separator none
+title Authentication
+
+top to bottom direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Component>
+
+Container_Boundary("LedgerlyApplication.LedgerlyApplication_boundary", "LedgerlyApplication", $tags="") {
+  Component(LedgerlyApplication.LedgerlyApplication.UserManagement, "User Management", $techn="Module", $descr="", $tags="", $link="")
+  Component(LedgerlyApplication.LedgerlyApplication.Authentication, "Authentication", $techn="Module", $descr="", $tags="", $link="")
+}
+
+Rel(LedgerlyApplication.LedgerlyApplication.Authentication, LedgerlyApplication.LedgerlyApplication.UserManagement, "uses", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml

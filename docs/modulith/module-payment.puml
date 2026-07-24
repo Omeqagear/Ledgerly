@@ -1,0 +1,19 @@
+@startuml
+set separator none
+title Payment Processing
+
+top to bottom direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Component>
+
+Container_Boundary("LedgerlyApplication.LedgerlyApplication_boundary", "LedgerlyApplication", $tags="") {
+  Component(LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "Invoice Management", $techn="Module", $descr="", $tags="", $link="")
+  Component(LedgerlyApplication.LedgerlyApplication.PaymentProcessing, "Payment Processing", $techn="Module", $descr="", $tags="", $link="")
+}
+
+Rel(LedgerlyApplication.LedgerlyApplication.PaymentProcessing, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml

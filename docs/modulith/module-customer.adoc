@@ -1,0 +1,19 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.ledgerly.customer`
+|Spring components
+|_Controllers_
+
+* `c.l.c.CustomerController`
+
+_Services_
+
+* `c.l.c.CustomerAPI` (via `c.l.c.CustomerService`)
+
+_Others_
+
+* `c.l.c.CustomerLookup` (via `c.l.c.internal.CustomerLookupImpl`)
+|Aggregate roots
+|* `c.l.c.Customer`
+|===

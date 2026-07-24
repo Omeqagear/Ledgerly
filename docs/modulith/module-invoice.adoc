@@ -1,0 +1,15 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.ledgerly.invoice`
+|Spring components
+|_Controllers_
+
+* `c.l.i.InvoiceController`
+
+_Services_
+
+* `c.l.i.InvoiceAPI` (via `c.l.i.InvoiceService`)
+|Aggregate roots
+|* `c.l.i.Invoice`
+|===

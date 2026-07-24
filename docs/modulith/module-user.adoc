@@ -1,0 +1,19 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.ledgerly.user`
+|Spring components
+|_Controllers_
+
+* `c.l.u.UserController`
+
+_Services_
+
+* `c.l.u.UserService`
+
+_Others_
+
+* `c.l.u.SeedUserRunner`
+|Aggregate roots
+|* `c.l.u.User`
+|===

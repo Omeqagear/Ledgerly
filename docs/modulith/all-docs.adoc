@@ -1,0 +1,35 @@
+== LedgerlyApplication
+plantuml::components.puml[,,format=svg]
+
+== Authentication
+plantuml::module-auth.puml[,,format=svg]
+include::module-auth.adoc[]
+
+== Config
+plantuml::module-config.puml[,,format=svg]
+include::module-config.adoc[]
+
+== Customer Management
+plantuml::module-customer.puml[,,format=svg]
+include::module-customer.adoc[]
+
+== Invoice Management
+plantuml::module-invoice.puml[,,format=svg]
+include::module-invoice.adoc[]
+
+== Notification
+plantuml::module-notification.puml[,,format=svg]
+include::module-notification.adoc[]
+
+== Payment Processing
+plantuml::module-payment.puml[,,format=svg]
+include::module-payment.adoc[]
+
+== Reporting & Document Generation
+plantuml::module-reporting.puml[,,format=svg]
+include::module-reporting.adoc[]
+
+== User Management
+plantuml::module-user.puml[,,format=svg]
+include::module-user.adoc[]
+
