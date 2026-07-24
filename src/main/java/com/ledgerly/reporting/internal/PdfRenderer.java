@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.awt.Color;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * Renders an invoice to a single-page PDF using OpenPDF. Layout primitives
@@ -189,5 +190,101 @@ public class PdfRenderer {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    public record TransactionRow(String date, String description, String invoiceNumber, String amount, String status) {}
+
+    public void renderCustomerStatementPdf(OutputStream output, String customerName, String statementPeriod,
+                                            String totalInvoiced, String totalPaid, String outstanding,
+                                            List<TransactionRow> transactions) throws DocumentException {
+        Document document = new Document(PageSize.A4, 56.7f, 56.7f, 56.7f, 56.7f);
+        PdfWriter.getInstance(document, output);
+        document.open();
+        try {
+            // Header section
+            Paragraph title = new Paragraph("Ledgerly", TITLE_FONT);
+            document.add(title);
+            Font subtitleFont = new Font(Font.HELVETICA, 16, Font.BOLD, ACCENT);
+            Paragraph subtitle = new Paragraph("CUSTOMER STATEMENT", subtitleFont);
+            subtitle.setSpacingAfter(20);
+            document.add(subtitle);
+
+            document.add(new Paragraph("Customer: " + safe(customerName), BODY_FONT));
+            document.add(new Paragraph("Statement Period: " + safe(statementPeriod), BODY_FONT));
+            addSpacer(document);
+
+            // Summary section
+            Paragraph section = new Paragraph("Summary", SECTION_LABEL_FONT);
+            section.setSpacingAfter(10);
+            document.add(section);
+
+            PdfPTable summaryTable = new PdfPTable(2);
+            summaryTable.setWidthPercentage(60);
+            summaryTable.setWidths(new float[]{1, 1});
+            addTotalRow(summaryTable, "Total Invoiced:", totalInvoiced);
+            addTotalRow(summaryTable, "Total Paid:", totalPaid);
+            addTotalRow(summaryTable, "Outstanding:", outstanding);
+            document.add(summaryTable);
+            addSpacer(document);
+
+            // Transaction table
+            Paragraph transSection = new Paragraph("Transactions", SECTION_LABEL_FONT);
+            transSection.setSpacingAfter(10);
+            document.add(transSection);
+
+            PdfPTable table = new PdfPTable(5);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{1.5f, 2, 1.5f, 1, 1});
+            Font headerFont = new Font(Font.HELVETICA, 10, Font.BOLD, Color.WHITE);
+            addTableHeader(table, "Date", headerFont);
+            addTableHeader(table, "Description", headerFont);
+            addTableHeader(table, "Invoice #", headerFont);
+            addTableHeader(table, "Amount", headerFont);
+            addTableHeader(table, "Status", headerFont);
+
+            Font rowFont = new Font(Font.HELVETICA, 10, Font.NORMAL, Color.BLACK);
+            boolean altRow = false;
+            for (TransactionRow row : transactions) {
+                Color bgColor = altRow ? ROW_ALT : Color.WHITE;
+                PdfPCell cell;
+                cell = new PdfPCell(new Phrase(row.date(), rowFont)); cell.setBackgroundColor(bgColor); cell.setPadding(8); table.addCell(cell);
+                cell = new PdfPCell(new Phrase(row.description(), rowFont)); cell.setBackgroundColor(bgColor); cell.setPadding(8); table.addCell(cell);
+                cell = new PdfPCell(new Phrase(row.invoiceNumber(), rowFont)); cell.setBackgroundColor(bgColor); cell.setPadding(8); table.addCell(cell);
+                cell = new PdfPCell(new Phrase(row.amount(), rowFont)); cell.setBackgroundColor(bgColor); cell.setPadding(8); cell.setHorizontalAlignment(Element.ALIGN_RIGHT); table.addCell(cell);
+                cell = new PdfPCell(new Phrase(row.status(), rowFont)); cell.setBackgroundColor(bgColor); cell.setPadding(8); cell.setHorizontalAlignment(Element.ALIGN_CENTER); table.addCell(cell);
+                altRow = !altRow;
+            }
+            document.add(table);
+
+            // Footer
+            addSpacer(document);
+            Font footerFont = new Font(Font.HELVETICA, 9, Font.ITALIC, ACCENT);
+            Paragraph footer = new Paragraph("Generated: " + java.time.LocalDateTime.now().toString(), footerFont);
+            footer.setAlignment(Element.ALIGN_RIGHT);
+            document.add(footer);
+        } finally {
+            document.close();
+        }
+    }
+
+    private void addTotalRow(PdfPTable table, String label, String value) {
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, TOTAL_LABEL_FONT));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        labelCell.setPadding(4f);
+        table.addCell(labelCell);
+        PdfPCell valueCell = new PdfPCell(new Phrase(safe(value), TOTAL_VALUE_FONT));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        valueCell.setPadding(4f);
+        table.addCell(valueCell);
+    }
+
+    private void addTableHeader(PdfPTable table, String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setBackgroundColor(PRIMARY);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(8);
+        table.addCell(cell);
     }
 }
