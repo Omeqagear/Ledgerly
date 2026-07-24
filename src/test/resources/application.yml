@@ -30,3 +30,11 @@ spring:
 
 server:
   port: 0
+
+ledgerly:
+  jwt:
+    secret: Zm9vYmFyLXRlc3Qtc2VjcmV0LWtleS1mb3Itand0LXNpZ25pbmctYWxnb3JpdGht
+    expiration-minutes: 30
+  seed:
+    admin-username: admin
+    admin-password: ledgerly
