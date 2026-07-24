@@ -53,3 +53,11 @@ logging:
   level:
     org.springframework.modulith: INFO
     org.hibernate.SQL: WARN
+
+ledgerly:
+  jwt:
+    secret: ${LEDGERLY_JWT_SECRET:Zm9vYmFyLXRlc3Qtc2VjcmV0LWtleS1mb3Itand0LXNpZ25pbmctYWxnb3JpdGht}
+    expiration-minutes: 30
+  seed:
+    admin-username: ${LEDGERLY_SEED_ADMIN_USERNAME:admin}
+    admin-password: ${LEDGERLY_SEED_ADMIN_PASSWORD:ledgerly}
