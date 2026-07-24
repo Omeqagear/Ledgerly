@@ -22,18 +22,18 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@Valid @RequestBody CreateUserRequest request) {
-        return userService.createUser(request.username(), request.password(), request.role());
+    public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
+        return UserResponse.from(userService.createUser(request.username(), request.password(), request.role()));
     }
 
     @GetMapping
-    public List<User> list() {
-        return userService.findAll();
+    public List<UserResponse> list() {
+        return userService.findAll().stream().map(UserResponse::from).toList();
     }
 
     @GetMapping("/{id}")
-    public User get(@PathVariable UUID id) {
-        return userService.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    public UserResponse get(@PathVariable UUID id) {
+        return UserResponse.from(userService.findById(id).orElseThrow(() -> new UserNotFoundException(id)));
     }
 
     @PutMapping("/{id}/password")
