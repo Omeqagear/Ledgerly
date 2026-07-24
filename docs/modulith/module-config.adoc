@@ -3,7 +3,8 @@
 |Base package
 |`com.ledgerly.config`
 |Spring components
-|* `c.l.c.DevSecurityConfig`
+|* `c.l.c.CacheConfig`
+* `c.l.c.DevSecurityConfig`
 * `c.l.c.ObservabilityConfig`
 * `c.l.c.RestExceptionHandler`
 * `c.l.c.SchedulingConfig`
