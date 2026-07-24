@@ -1,5 +1,6 @@
 package com.ledgerly.reporting;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,19 +34,23 @@ public class ReportService {
         return overallSummary(null, null);
     }
 
+    @Cacheable(value = "reports", key = "'summary-' + (#from != null ? #from : 'all') + '-' + (#to != null ? #to : 'all')")
     public OverallSummary overallSummary(LocalDate from, LocalDate to) {
         dateRangeValidator.validate(from, to);
         return reportGenerator.overall(from, to);
     }
 
+    @Cacheable(value = "reports", key = "'cust-summary-' + #customerId")
     public CustomerSummary customerSummary(UUID customerId) {
         return reportGenerator.forCustomer(customerId);
     }
 
+    @Cacheable(value = "reports", key = "'aging'")
     public AgingReport agingReport() {
         return reportGenerator.agingReport();
     }
 
+    @Cacheable(value = "reports", key = "'aging-cust-' + #customerId")
     public AgingReport agingReportForCustomer(UUID customerId) {
         return reportGenerator.agingReportForCustomer(customerId);
     }

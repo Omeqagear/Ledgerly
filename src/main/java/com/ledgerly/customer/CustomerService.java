@@ -1,6 +1,7 @@
 package com.ledgerly.customer;
 
 import com.ledgerly.customer.internal.CustomerRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class CustomerService implements CustomerAPI {
         this.customerRepository = customerRepository;
     }
 
+    @CacheEvict(value = "customers", key = "#result.id")
     public Customer createCustomer(String name, String email, String taxId, String address) {
         assertEmailNotInUse(email);
         try {
@@ -35,6 +37,7 @@ public class CustomerService implements CustomerAPI {
         }
     }
 
+    @CacheEvict(value = "customers", key = "#id")
     public Customer updateCustomer(UUID id, String name, String email, String taxId,
                                     String address, String preferredLanguage) {
         Customer customer = customerRepository.findById(id)
@@ -72,6 +75,7 @@ public class CustomerService implements CustomerAPI {
         return customerRepository.existsById(id);
     }
 
+    @CacheEvict(value = "customers", key = "#id")
     public void deleteCustomer(UUID id) {
         if (!customerRepository.existsById(id)) {
             throw new CustomerNotFoundException(id);

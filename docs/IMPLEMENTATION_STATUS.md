@@ -233,10 +233,30 @@ What was delivered:
   MockMvc test verifying query-param binding, sort application, and size
   clamping
 
-#### Phase 9b — Redis caching (NOT STARTED)
+#### Phase 9b — Redis caching (COMPLETED)
 
-- Add Spring Cache + Redis for customer lookups and report summaries
-- Requires a Redis service in docker-compose + testcontainers
+**Status:** all planned features implemented.
+
+What was delivered:
+- `spring-boot-starter-data-redis` dependency for Redis connectivity and
+  `RedisCacheManager` auto-configuration
+- `CacheConfig` (`@EnableCaching`) with per-region TTLs: `customers` cache
+  (no TTL, eviction-based) and `reports` cache (5-min TTL)
+- `CustomerLookupImpl` methods (`findEmailById`, `findInfoById`, `exists`)
+  annotated with `@Cacheable`
+- `CustomerService` mutations (`createCustomer`, `updateCustomer`,
+  `deleteCustomer`) annotated with `@CacheEvict`
+- `ReportService` summary methods (`overallSummary`, `customerSummary`,
+  `agingReport`, `agingReportForCustomer`) annotated with `@Cacheable`
+- `application.yml`: default `spring.cache.type=simple` (in-memory) for
+  dev; prod overrides to `redis` via docker compose environment
+- `docker-compose.yml`: Redis 7 Alpine service, app service wired to it
+- Test `application.yml`: `spring.cache.type=none` to keep existing
+  module tests isolated
+- `CachingIntegrationTest`: 6 tests using Testcontainers Redis verifying
+  cache population, eviction, and report caching (tagged `redis`, run
+  with `mvn test -Dgroups=redis` when Docker is available)
+- `testcontainers-redis` 2.2.2 test dependency
 
 #### Phase 9c — Load/performance tests (NOT STARTED)
 
