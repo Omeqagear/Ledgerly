@@ -57,4 +57,11 @@ public class ReportController {
         response.setHeader("Content-Disposition", "attachment; filename=\"invoice-" + invoiceId + ".pdf\"");
         reportService.generateInvoicePdf(response.getOutputStream(), invoiceId);
     }
+
+    @GetMapping("/customers/{customerId}/statement.pdf")
+    public void customerStatement(@PathVariable UUID customerId, HttpServletResponse response) throws IOException {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"statement-" + customerId + ".pdf\"");
+        reportService.generateCustomerStatementPdf(response.getOutputStream(), customerId);
+    }
 }

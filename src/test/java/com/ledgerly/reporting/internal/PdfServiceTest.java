@@ -32,11 +32,20 @@ class PdfServiceTest {
     @Mock
     private PdfRenderer pdfRenderer;
 
+    @Mock
+    private ReportRepository reportRepository;
+
+    @Mock
+    private com.ledgerly.customer.CustomerService customerService;
+
+    @Mock
+    private ReportGenerator reportGenerator;
+
     private PdfService pdfService;
 
     @BeforeEach
     void setUp() {
-        pdfService = new PdfService(invoiceDataProvider, pdfRenderer);
+        pdfService = new PdfService(invoiceDataProvider, pdfRenderer, reportRepository, customerService, reportGenerator);
     }
 
     @Test

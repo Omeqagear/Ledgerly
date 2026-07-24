@@ -50,4 +50,8 @@ public class ReportService {
     public void generateInvoicePdf(java.io.OutputStream output, java.util.UUID invoiceId) {
         pdfService.generateInvoicePdf(output, invoiceId);
     }
+
+    public void generateCustomerStatementPdf(java.io.OutputStream output, java.util.UUID customerId) {
+        pdfService.generateCustomerStatementPdf(output, customerId);
+    }
 }
