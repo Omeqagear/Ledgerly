@@ -1,5 +1,6 @@
 package com.ledgerly.reporting.internal;
 
+import com.ledgerly.invoice.InvoiceStatus;
 import com.lowagie.text.pdf.PdfReader;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ class PdfRendererTest {
     void shouldProduceValidMultiPageCountPdf() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         renderer.renderInvoicePdf(out, "Acme Corp", "INV-2026-000001",
-            "2026-07-01", "2026-07-31", "1000.00", "200.00", "1200.00", "ISSUED");
+            "2026-07-01", "2026-07-31", "1000.00", "200.00", "1200.00", InvoiceStatus.ISSUED);
 
         assertThat(out.toByteArray()).isNotEmpty();
         assertValidPdf(out.toByteArray());
@@ -25,7 +26,7 @@ class PdfRendererTest {
     void shouldProduceValidPdfForPaidStatus() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         renderer.renderInvoicePdf(out, "Globex Inc.", "INV-2026-000002",
-            "2026-06-01", "2026-06-30", "500.00", "100.00", "600.00", "PAID");
+            "2026-06-01", "2026-06-30", "500.00", "100.00", "600.00", InvoiceStatus.PAID);
 
         assertValidPdf(out.toByteArray());
     }
@@ -34,7 +35,7 @@ class PdfRendererTest {
     void shouldProduceValidPdfForOverdueStatus() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         renderer.renderInvoicePdf(out, "Initech", "INV-2026-000003",
-            "2026-05-01", "2026-05-15", "750.00", "150.00", "900.00", "OVERDUE");
+            "2026-05-01", "2026-05-15", "750.00", "150.00", "900.00", InvoiceStatus.OVERDUE);
 
         assertValidPdf(out.toByteArray());
     }

@@ -44,3 +44,6 @@ Thumbs.db
 
 *.m2tmp
 *.codegraph
+
+# Environment files
+.env

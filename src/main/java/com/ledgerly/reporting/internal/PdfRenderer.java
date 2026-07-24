@@ -1,5 +1,6 @@
 package com.ledgerly.reporting.internal;
 
+import com.ledgerly.invoice.InvoiceStatus;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -46,7 +47,7 @@ public class PdfRenderer {
 
     public void renderInvoicePdf(OutputStream output, String customerName, String invoiceNumber,
                                   String issueDate, String dueDate, String subtotal,
-                                  String tax, String total, String status) throws DocumentException {
+                                  String tax, String total, InvoiceStatus status) throws DocumentException {
         Document document = new Document(PageSize.A4, MARGIN, MARGIN, MARGIN, MARGIN);
         PdfWriter.getInstance(document, output);
         document.open();
@@ -111,7 +112,7 @@ public class PdfRenderer {
     }
 
     private void addTotals(Document document, String subtotal, String tax, String total,
-                           String status) throws DocumentException {
+                           InvoiceStatus status) throws DocumentException {
         Color statusColor = statusColor(status);
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(45);
@@ -123,7 +124,7 @@ public class PdfRenderer {
         table.addCell(totalsLabelCell("Total"));
         Font totalFont = new Font(Font.HELVETICA, 11, Font.BOLD, statusColor);
         PdfPCell totalCell = new PdfPCell(new Phrase(
-            safe(total) + "  [" + safe(status) + "]", totalFont));
+            safe(total) + "  [" + (status != null ? status.name() : "") + "]", totalFont));
         totalCell.setBorder(Rectangle.NO_BORDER);
         totalCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         totalCell.setPadding(4f);
@@ -176,14 +177,14 @@ public class PdfRenderer {
         return cell;
     }
 
-    private Color statusColor(String status) {
+    private Color statusColor(InvoiceStatus status) {
         if (status == null) {
             return STATUS_DEFAULT;
         }
         switch (status) {
-            case "PAID": return STATUS_PAID;
-            case "OVERDUE": return STATUS_OVERDUE;
-            case "ISSUED": return STATUS_ISSUED;
+            case PAID: return STATUS_PAID;
+            case OVERDUE: return STATUS_OVERDUE;
+            case ISSUED: return STATUS_ISSUED;
             default: return STATUS_DEFAULT;
         }
     }

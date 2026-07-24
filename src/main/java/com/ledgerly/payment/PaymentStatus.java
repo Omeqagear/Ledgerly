@@ -11,5 +11,9 @@ package com.ledgerly.payment;
 public enum PaymentStatus {
     PENDING,
     COMPLETED,
-    FAILED
+    FAILED;
+
+    public static final String PENDING_STR = "PENDING";
+    public static final String COMPLETED_STR = "COMPLETED";
+    public static final String FAILED_STR = "FAILED";
 }

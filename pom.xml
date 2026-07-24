@@ -140,6 +140,13 @@
             <version>2.2.2</version>
             <scope>test</scope>
         </dependency>
+        <!-- Gatling load testing -->
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>3.10.5</version>
+            <scope>test</scope>
+        </dependency>
         <!-- H2: in-memory DB so module integration tests can run without Docker/Postgres -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -191,6 +198,29 @@
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.8.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scalaVersion>2.13.12</scalaVersion>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>4.8.2</version>
+                <configuration>
+                    <runMultipleSimulations>true</runMultipleSimulations>
                 </configuration>
             </plugin>
         </plugins>

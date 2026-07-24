@@ -1,5 +1,7 @@
 package com.ledgerly.reporting.internal;
 
+import com.ledgerly.invoice.InvoiceStatus;
+import com.ledgerly.payment.PaymentStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -77,7 +79,7 @@ class ReportRepository {
 
     BigDecimal totalAmountPaid() {
         BigDecimal amount = jdbc.queryForObject(
-            "SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'COMPLETED'",
+            "SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = '" + PaymentStatus.COMPLETED_STR + "'",
             BigDecimal.class
         );
         return amount != null ? amount : BigDecimal.ZERO;
@@ -85,7 +87,7 @@ class ReportRepository {
 
     BigDecimal totalOutstanding() {
         BigDecimal amount = jdbc.queryForObject(
-            "SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status IN ('ISSUED', 'OVERDUE')",
+            "SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status IN ('" + InvoiceStatus.ISSUED_STR + "', '" + InvoiceStatus.OVERDUE_STR + "')",
             BigDecimal.class
         );
         return amount != null ? amount : BigDecimal.ZERO;
@@ -106,7 +108,7 @@ class ReportRepository {
 
     long countPaidInvoicesForCustomer(UUID customerId) {
         Long cnt = jdbc.queryForObject(
-            "SELECT COUNT(*) FROM invoices WHERE customer_id = ? AND status = 'PAID'",
+            "SELECT COUNT(*) FROM invoices WHERE customer_id = ? AND status = '" + InvoiceStatus.PAID_STR + "'",
             Long.class, customerId);
         return cnt != null ? cnt : 0L;
     }
@@ -120,7 +122,7 @@ class ReportRepository {
 
     BigDecimal totalPaidForCustomer(UUID customerId) {
         BigDecimal amount = jdbc.queryForObject(
-            "SELECT COALESCE(SUM(amount), 0) FROM payments WHERE customer_id = ? AND status = 'COMPLETED'",
+            "SELECT COALESCE(SUM(amount), 0) FROM payments WHERE customer_id = ? AND status = '" + PaymentStatus.COMPLETED_STR + "'",
             BigDecimal.class, customerId);
         return amount != null ? amount : BigDecimal.ZERO;
     }
@@ -128,7 +130,7 @@ class ReportRepository {
     BigDecimal totalOutstandingForCustomer(UUID customerId) {
         BigDecimal amount = jdbc.queryForObject(
             "SELECT COALESCE(SUM(total_amount), 0) FROM invoices "
-                + "WHERE customer_id = ? AND status IN ('ISSUED', 'OVERDUE')",
+                + "WHERE customer_id = ? AND status IN ('" + InvoiceStatus.ISSUED_STR + "', '" + InvoiceStatus.OVERDUE_STR + "')",
             BigDecimal.class, customerId);
         return amount != null ? amount : BigDecimal.ZERO;
     }
@@ -161,7 +163,7 @@ class ReportRepository {
     List<OutstandingInvoice> findOutstandingInvoices() {
         return jdbc.query(
             "SELECT id, customer_id, invoice_number, total_amount, due_date "
-                + "FROM invoices WHERE status IN ('ISSUED', 'OVERDUE')",
+                + "FROM invoices WHERE status IN ('" + InvoiceStatus.ISSUED_STR + "', '" + InvoiceStatus.OVERDUE_STR + "')",
             (rs, n) -> new OutstandingInvoice(
                 rs.getObject("id", UUID.class),
                 rs.getObject("customer_id", UUID.class),
@@ -175,7 +177,7 @@ class ReportRepository {
     List<OutstandingInvoice> findOutstandingInvoicesForCustomer(UUID customerId) {
         return jdbc.query(
             "SELECT id, customer_id, invoice_number, total_amount, due_date "
-                + "FROM invoices WHERE customer_id = ? AND status IN ('ISSUED', 'OVERDUE')",
+                + "FROM invoices WHERE customer_id = ? AND status IN ('" + InvoiceStatus.ISSUED_STR + "', '" + InvoiceStatus.OVERDUE_STR + "')",
             (rs, n) -> new OutstandingInvoice(
                 rs.getObject("id", UUID.class),
                 rs.getObject("customer_id", UUID.class),
