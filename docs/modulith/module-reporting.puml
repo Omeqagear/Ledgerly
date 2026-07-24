@@ -1,0 +1,21 @@
+@startuml
+set separator none
+title Reporting & Document Generation
+
+top to bottom direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Component>
+
+Container_Boundary("LedgerlyApplication.LedgerlyApplication_boundary", "LedgerlyApplication", $tags="") {
+  Component(LedgerlyApplication.LedgerlyApplication.CustomerManagement, "Customer Management", $techn="Module", $descr="", $tags="", $link="")
+  Component(LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "Invoice Management", $techn="Module", $descr="", $tags="", $link="")
+  Component(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, "Reporting & Document Generation", $techn="Module", $descr="", $tags="", $link="")
+}
+
+Rel(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
+Rel(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, LedgerlyApplication.LedgerlyApplication.CustomerManagement, "uses", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml

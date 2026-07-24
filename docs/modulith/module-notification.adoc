@@ -1,0 +1,15 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.ledgerly.notification`
+|Spring components
+|_Services_
+
+* `c.l.n.NotificationService`
+|Bean references
+|* `c.l.c.CustomerLookup` (in Customer Management)
+|Events listened to
+|* `c.l.i.InvoiceCreatedEvent` (async) 
+* `c.l.i.InvoicePaidEvent` (async) 
+* `c.l.p.PaymentProcessedEvent` (async) 
+|===

@@ -1,0 +1,17 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.ledgerly.payment`
+|Spring components
+|_Controllers_
+
+* `c.l.p.PaymentController`
+
+_Services_
+
+* `c.l.p.PaymentAPI` (via `c.l.p.PaymentService`)
+|Bean references
+|* `c.l.i.InvoiceAPI` (in Invoice Management)
+|Aggregate roots
+|* `c.l.p.Payment`
+|===

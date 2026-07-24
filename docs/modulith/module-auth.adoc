@@ -1,0 +1,16 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.ledgerly.auth`
+|Spring components
+|_Controllers_
+
+* `c.l.a.AuthController`
+
+_Others_
+
+* `c.l.a.AuthConfig`
+* `c.l.a.JwtService`
+|Bean references
+|* `c.l.u.UserService` (in User Management)
+|===
