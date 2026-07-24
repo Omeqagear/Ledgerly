@@ -12,6 +12,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=ledgerly
       - SPRING_DATASOURCE_PASSWORD=ledgerly_secret
       - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_CACHE_TYPE=redis
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,6 +49,15 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
+    networks:
+      - ledgerly-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: ledgerly-redis
+    ports:
+      - "6379:6379"
     networks:
       - ledgerly-network
     restart: unless-stopped
