@@ -4,6 +4,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+to_docker_path() {
+  local path="$1"
+  if command -v cygpath &>/dev/null; then
+    cygpath -w "$path"
+  elif command -v wslpath &>/dev/null; then
+    wslpath -w "$path"
+  else
+    echo "$path"
+  fi
+}
+DOCKER_PROJECT_DIR="$(to_docker_path "$PROJECT_DIR")"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -38,8 +50,8 @@ for i in $(seq 1 30); do
 done
 
 echo "[4/4] Running Gatling simulations (via Docker Maven)..."
-docker run --rm \
-  -v "$PROJECT_DIR:/app" \
+MSYS_NO_PATHCONV=1 docker run --rm \
+  -v "$DOCKER_PROJECT_DIR:/app" \
   -v maven-cache:/root/.m2 \
   -w /app \
   maven:3.9.9-eclipse-temurin-21 \
