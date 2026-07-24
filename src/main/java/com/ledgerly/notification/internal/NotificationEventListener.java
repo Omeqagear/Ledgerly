@@ -33,7 +33,8 @@ class NotificationEventListener {
         customerLookup.findEmailById(event.customerId()).ifPresent(email ->
             emailSender.send(
                 email,
-                "Invoice " + event.invoiceNumber() + " created",
+                NotificationConstants.SUBJECT_INVOICE_CREATED_PREFIX + event.invoiceNumber()
+                    + NotificationConstants.SUBJECT_INVOICE_CREATED_SUFFIX,
                 templateEngine.renderInvoiceCreated(event.invoiceNumber(), event.totalAmount())
             )
         );
@@ -44,7 +45,7 @@ class NotificationEventListener {
         customerLookup.findEmailById(event.customerId()).ifPresent(email ->
             emailSender.send(
                 email,
-                "Payment received",
+                NotificationConstants.SUBJECT_PAYMENT_RECEIVED,
                 templateEngine.renderInvoicePaid(event.invoiceId().toString(), event.amountPaid())
             )
         );
@@ -58,10 +59,12 @@ class NotificationEventListener {
         customerLookup.findEmailById(event.customerId()).ifPresent(email ->
             emailSender.send(
                 email,
-                "Payment failed",
+                NotificationConstants.SUBJECT_PAYMENT_FAILED,
                 templateEngine.renderPaymentFailed(
                     event.invoiceId().toString(),
-                    event.failureReason() == null ? "unknown" : event.failureReason()
+                    event.failureReason() == null
+                        ? NotificationConstants.DEFAULT_FAILURE_REASON
+                        : event.failureReason()
                 )
             )
         );

@@ -1,5 +1,7 @@
 package com.ledgerly.reporting.internal;
 
+import com.ledgerly.invoice.InvoiceStatus;
+import com.ledgerly.payment.PaymentStatus;
 import com.ledgerly.reporting.AgingBucket;
 import com.ledgerly.reporting.AgingReport;
 import com.ledgerly.reporting.CustomerSummary;
@@ -23,11 +25,11 @@ class ExcelRendererTest {
     @Test
     void summaryExcelShouldProduceValidXlsx() throws Exception {
         Map<String, Long> invoicesByStatus = new LinkedHashMap<>();
-        invoicesByStatus.put("ISSUED", 3L);
-        invoicesByStatus.put("PAID", 5L);
+        invoicesByStatus.put(InvoiceStatus.ISSUED_STR, 3L);
+        invoicesByStatus.put(InvoiceStatus.PAID_STR, 5L);
 
         Map<String, Long> paymentsByStatus = new LinkedHashMap<>();
-        paymentsByStatus.put("COMPLETED", 4L);
+        paymentsByStatus.put(PaymentStatus.COMPLETED_STR, 4L);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         renderer.renderSummaryExcel(out, 10L, invoicesByStatus, paymentsByStatus,

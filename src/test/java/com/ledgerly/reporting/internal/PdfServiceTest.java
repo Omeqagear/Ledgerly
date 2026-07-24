@@ -72,7 +72,7 @@ class PdfServiceTest {
         verify(pdfRenderer).renderInvoicePdf(
             eq(output), eq("Acme Corp"), eq("INV-2026-000001"),
             eq("2026-07-01"), eq("2026-07-31"),
-            eq("1200.00"), eq("200.00"), eq("1200.00"), eq("ISSUED"));
+            eq("1200.00"), eq("200.00"), eq("1200.00"), eq(InvoiceStatus.ISSUED));
     }
 
     @Test
@@ -95,7 +95,7 @@ class PdfServiceTest {
         OutputStream output = mock(OutputStream.class);
         doThrow(new DocumentException("boom"))
             .when(pdfRenderer).renderInvoicePdf(any(), any(), any(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any(), any(InvoiceStatus.class));
 
         assertThatThrownBy(() -> pdfService.generateInvoicePdf(output, invoiceId))
             .isInstanceOf(RuntimeException.class)

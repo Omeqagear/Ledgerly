@@ -39,7 +39,7 @@ public class PdfService {
             pdfRenderer.renderInvoicePdf(output, customer.getName(), invoice.getInvoiceNumber(),
                 formatDate(invoice.getIssueDate()), formatDate(invoice.getDueDate()),
                 formatAmount(invoice.getTotalAmount()), formatAmount(invoice.getTaxAmount()),
-                formatAmount(invoice.getTotalAmount()), invoice.getStatus().name());
+                formatAmount(invoice.getTotalAmount()), invoice.getStatus());
         } catch (DocumentException e) {
             throw new RuntimeException("Failed to generate PDF", e);
         }
