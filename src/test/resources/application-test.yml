@@ -1,0 +1,40 @@
+# Profile-specific config for the "test" profile, activated via
+# @ActiveProfiles("test") on SecurityIntegrationTest. This profile does NOT
+# activate "dev", so SecurityConfig (@Profile("!dev")) is loaded and the JWT
+# resource server + RBAC converter is exercised end-to-end through MockMvc.
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:ledgerly;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true
+
+server:
+  port: 0
+
+ledgerly:
+  jwt:
+    secret: Zm9vYmFyLXRlc3Qtc2VjcmV0LWtleS1mb3Itand0LXNpZ25pbmctYWxnb3JpdGht
+    expiration-minutes: 30
+  seed:
+    admin-username: admin
+    admin-password: ledgerly
