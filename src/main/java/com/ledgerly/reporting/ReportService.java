@@ -62,4 +62,8 @@ public class ReportService {
         dateRangeValidator.validate(from, to);
         excelService.generateSummaryExcel(output, from, to);
     }
+
+    public void generateAgingExcel(java.io.OutputStream output) {
+        excelService.generateAgingExcel(output);
+    }
 }
