@@ -1,7 +1,7 @@
-# Test profile overrides: in-memory H2 so no external database is required
-# during `@ApplicationModuleTest` runs. Spring Boot loads this file BEFORE
-# src/main/resources/application.yml because src/test/resources is ahead on
-# the test classpath.
+# Profile-specific config for the "test" profile, activated via
+# @ActiveProfiles("test") on SecurityIntegrationTest. This profile does NOT
+# activate "dev", so SecurityConfig (@Profile("!dev")) is loaded and the JWT
+# resource server + RBAC converter is exercised end-to-end through MockMvc.
 
 spring:
   datasource:

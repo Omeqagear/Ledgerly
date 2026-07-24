@@ -6,28 +6,19 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Production/default security configuration.
- *
- * <p>Business endpoints require HTTP Basic authentication. A default dev user is
- * provided so the API is usable out of the box, but you should replace this with
- * JWT / OAuth2 / a real user store before production use.
- */
+import java.util.List;
+
 @Configuration
 @Profile("!dev")
 @Order(1)
 public class SecurityConfig {
-
-    public static final String DEFAULT_USER = "ledgerly";
-    public static final String DEFAULT_PASSWORD = "ledgerly";
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -36,6 +27,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/auth/login",
                     "/error",
                     "/actuator/health",
                     "/actuator/health/**",
@@ -43,9 +35,11 @@ public class SecurityConfig {
                     "/actuator/prometheus",
                     "/actuator/modulith"
                 ).permitAll()
+                .requestMatchers("/users/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-            .httpBasic(basic -> {})
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+            .httpBasic(basic -> basic.disable())
             .formLogin(form -> form.disable());
         return http.build();
     }
@@ -55,13 +49,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user = User.builder()
-            .username(DEFAULT_USER)
-            .password(passwordEncoder.encode(DEFAULT_PASSWORD))
-            .roles("USER", "ADMIN")
-            .build();
-        return new InMemoryUserDetailsManager(user);
+    private JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            String role = jwt.getClaimAsString("role");
+            if (role == null || role.isBlank()) {
+                return List.of();
+            }
+            return List.<GrantedAuthority>of(new SimpleGrantedAuthority("ROLE_" + role));
+        });
+        return converter;
     }
 }
