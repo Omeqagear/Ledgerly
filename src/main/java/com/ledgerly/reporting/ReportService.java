@@ -66,4 +66,8 @@ public class ReportService {
     public void generateAgingExcel(java.io.OutputStream output) {
         excelService.generateAgingExcel(output);
     }
+
+    public void generateCustomerSummaryExcel(java.io.OutputStream output, UUID customerId) {
+        excelService.generateCustomerSummaryExcel(output, customerId);
+    }
 }

@@ -83,4 +83,11 @@ public class ReportController {
         response.setHeader("Content-Disposition", "attachment; filename=\"aging.xlsx\"");
         reportService.generateAgingExcel(response.getOutputStream());
     }
+
+    @GetMapping("/customers/{customerId}/excel")
+    public void customerExcel(@PathVariable UUID customerId, HttpServletResponse response) throws IOException {
+        response.setContentType(EXCEL_CONTENT_TYPE);
+        response.setHeader("Content-Disposition", "attachment; filename=\"customer-" + customerId + ".xlsx\"");
+        reportService.generateCustomerSummaryExcel(response.getOutputStream(), customerId);
+    }
 }
