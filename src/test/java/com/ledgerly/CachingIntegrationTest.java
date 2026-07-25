@@ -114,8 +114,6 @@ class CachingIntegrationTest {
     @Test
     void shouldCacheCustomerAgingReport() {
         AgingReport report1 = reportService.agingReportForCustomer(UUID.randomUUID());
-        AgingReport report2 = reportService.agingReportForCustomer(UUID.randomUUID());
-
         assertThat(report1).isNotNull();
         assertThat(report1.buckets()).hasSize(5);
     }

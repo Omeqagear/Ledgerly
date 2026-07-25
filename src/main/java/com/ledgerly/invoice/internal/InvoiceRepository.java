@@ -1,7 +1,6 @@
 package com.ledgerly.invoice.internal;
 
 import com.ledgerly.invoice.Invoice;
-import com.ledgerly.invoice.InvoiceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

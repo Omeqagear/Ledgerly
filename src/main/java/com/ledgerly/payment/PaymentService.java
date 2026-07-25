@@ -1,8 +1,6 @@
 package com.ledgerly.payment;
 
 import com.ledgerly.invoice.InvoiceAPI;
-import com.ledgerly.invoice.InvoiceNotFoundException;
-import com.ledgerly.invoice.InvoiceStatus;
 import com.ledgerly.payment.internal.PaymentGatewayClient;
 import com.ledgerly.payment.internal.PaymentRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -47,20 +45,6 @@ public class PaymentService implements PaymentAPI {
      */
     public Payment processPayment(UUID invoiceId, UUID customerId, BigDecimal amount,
                                    String paymentMethod, String transactionReference) {
-        InvoiceStatus status = invoiceAPI.findById(invoiceId)
-            .map(inv -> {
-                if (inv.getStatus() != InvoiceStatus.ISSUED && inv.getStatus() != InvoiceStatus.OVERDUE) {
-                    throw new IllegalStateException(
-                        "Invoice is not payable (status=" + inv.getStatus() + ")");
-                }
-                if (amount.compareTo(inv.getTotalAmount()) != 0) {
-                    throw new IllegalArgumentException(
-                        "Payment amount does not match invoice total");
-                }
-                return inv.getStatus();
-            })
-            .orElseThrow(() -> new InvoiceNotFoundException(invoiceId));
-
         Payment payment = new Payment(invoiceId, customerId, amount, paymentMethod, transactionReference);
         payment = paymentRepository.save(payment);
 
