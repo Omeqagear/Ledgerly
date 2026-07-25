@@ -19,16 +19,16 @@ Container_Boundary("LedgerlyApplication.LedgerlyApplication_boundary", "Ledgerly
   Component(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, "Reporting & Document Generation", $techn="Module", $descr="", $tags="", $link="")
 }
 
-Rel(LedgerlyApplication.LedgerlyApplication.Authentication, LedgerlyApplication.LedgerlyApplication.UserManagement, "uses", $techn="", $tags="", $link="")
-Rel(LedgerlyApplication.LedgerlyApplication.PaymentProcessing, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Notification, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "listens to", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Notification, LedgerlyApplication.LedgerlyApplication.PaymentProcessing, "listens to", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Notification, LedgerlyApplication.LedgerlyApplication.CustomerManagement, "uses", $techn="", $tags="", $link="")
+Rel(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
+Rel(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, LedgerlyApplication.LedgerlyApplication.CustomerManagement, "uses", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Config, LedgerlyApplication.LedgerlyApplication.CustomerManagement, "depends on", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Config, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "depends on", $techn="", $tags="", $link="")
 Rel(LedgerlyApplication.LedgerlyApplication.Config, LedgerlyApplication.LedgerlyApplication.PaymentProcessing, "depends on", $techn="", $tags="", $link="")
-Rel(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
-Rel(LedgerlyApplication.LedgerlyApplication.ReportingDocumentGeneration, LedgerlyApplication.LedgerlyApplication.CustomerManagement, "uses", $techn="", $tags="", $link="")
+Rel(LedgerlyApplication.LedgerlyApplication.Authentication, LedgerlyApplication.LedgerlyApplication.UserManagement, "uses", $techn="", $tags="", $link="")
+Rel(LedgerlyApplication.LedgerlyApplication.PaymentProcessing, LedgerlyApplication.LedgerlyApplication.InvoiceManagement, "uses", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 @enduml
